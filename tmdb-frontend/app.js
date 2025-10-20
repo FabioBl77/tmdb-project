@@ -106,34 +106,39 @@ async function getProfile() {
 }
 
 // --- LOGOUT ---
-document.addEventListener("DOMContentLoaded", () => {
-  const btnLogout = document.getElementById("btnLogout");
-  if (btnLogout) {
-    btnLogout.addEventListener("click", async () => {
-      try {
-        if (!refreshToken) return showMessage("Nessun utente loggato", "error");
+document.getElementById("logoutForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-        const res = await fetch(`${API_BASE_URL}/auth/logout`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken })
-        });
+  try {
+    const refreshToken = document.getElementById("hiddenRefreshToken").value;
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Errore nel logout");
-
-        accessToken = null;
-        refreshToken = null;
-
-        showMessage("Logout effettuato! La pagina verrà ricaricata...");
-        setTimeout(() => window.location.reload(), 1000);
-
-      } catch (error) {
-        showMessage(error.message, "error");
-      }
+    const res = await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
     });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Errore logout");
+
+    // Reset token e interfaccia
+    accessToken = null;
+    refreshToken = null;
+    document.getElementById("profileSection").classList.add("hidden");
+    document.getElementById("authSection").classList.remove("hidden");
+    document.getElementById("profileData").textContent = "";
+    document.getElementById("results").innerHTML = "";
+    document.getElementById("moviesList").innerHTML = "";
+
+    showMessage("Logout effettuato con successo!");
+
+    // Opzionale: ricarica pagina
+    window.location.reload();
+  } catch (error) {
+    showMessage(error.message, "error");
   }
 });
+
 
 
 // --- RICERCA FILM SU TMDB ---
