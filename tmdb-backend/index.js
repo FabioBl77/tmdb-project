@@ -5,6 +5,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import SequelizeStoreLib from 'connect-session-sequelize';
 import { sequelize } from './config/database.js';
+
+// Import dei modelli
+import './models/User.js';
+import './models/Movie.js';
+import './models/RefreshToken.js';
+
 import './passport/passport.js';
 import authRoutes from './routes/auth.js';
 import movieRoutes from './routes/movies.js';
@@ -30,11 +36,14 @@ app.use(
   })
 );
 
+// Sincronizza solo la tabella delle sessioni
 sessionStore.sync();
 
+// Inizializza Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Rotte
 app.use('/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/tmdb', tmdbRoutes);
@@ -51,22 +60,26 @@ app.use((err, req, res, next) => {
   res.status(status).json({
     error: message,
     method: req.method,
-    endpoint: req.originalUrl
+    endpoint: req.originalUrl,
   });
 });
 
-
 const PORT = process.env.PORT || 3000;
 
-sequelize
-  .authenticate()
-  .then(() => {
+(async () => {
+  try {
+    await sequelize.authenticate();
     console.log('Connessione al database riuscita');
+
+    // Sincronizza tutti i modelli con il DB
+    await sequelize.sync({ alter: true }); // alter:true aggiorna tabelle senza cancellare dati
+    console.log('Tabelle sincronizzate correttamente');
+
     app.listen(PORT, () => {
       console.log(`Server avviato su http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error('Errore connessione DB:', err);
+  } catch (error) {
+    console.error('Errore connessione DB:', error);
     process.exit(1);
-  });
+  }
+})();

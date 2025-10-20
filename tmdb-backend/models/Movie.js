@@ -18,7 +18,7 @@ export const Movie = sequelize.define(
       type: DataTypes.STRING(200),
       allowNull: false
     },
-    genres: {
+    genre: { // rinominato da genres per coerenza
       type: DataTypes.STRING,
       allowNull: true
     },
@@ -30,6 +30,10 @@ export const Movie = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true
     },
+    director: { // nuovo campo
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true
@@ -37,10 +41,15 @@ export const Movie = sequelize.define(
     release_date: {
       type: DataTypes.DATEONLY,
       allowNull: true
+    },
+    poster_path: { // nuovo campo per URL immagine
+      type: DataTypes.STRING,
+      allowNull: true
     }
   },
   {
     tableName: 'movies',
-    timestamps: true
+    timestamps: true,
+    underscored: true // se vuoi che i campi timestamp siano created_at / updated_at
   }
 );

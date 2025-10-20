@@ -29,7 +29,8 @@ export const RefreshToken = sequelize.define(
       references: {
         model: 'users',
         key: 'id'
-      }
+      },
+      onDelete: 'CASCADE' // se un utente viene eliminato, i token vengono rimossi
     }
   },
   {
@@ -38,6 +39,6 @@ export const RefreshToken = sequelize.define(
   }
 );
 
-// Relazione con User
-RefreshToken.belongsTo(User, { foreignKey: 'userId' }); // Un token appartiene a un utente
-User.hasMany(RefreshToken, { foreignKey: 'userId' }); // un utente può avere più refresh token attivi (utile se l’utente si logga da più dispositivi).
+// --- RELAZIONI ---
+RefreshToken.belongsTo(User, { foreignKey: 'userId' }); 
+User.hasMany(RefreshToken, { foreignKey: 'userId' }); 

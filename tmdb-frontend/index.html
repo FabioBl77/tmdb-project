@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMDB Node.js Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>TMDB Dashboard</h1>
+    <nav>
+      <button id="btnLogin">Login</button>
+      <button id="btnProfile">Profilo</button>
+      <button id="btnLogout">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Sezione Registrazione -->
+    <section id="registerSection">
+      <h2>Registrazione Utente</h2>
+      <form id="registerForm">
+        <input type="text" id="regUsername" placeholder="Username" required />
+        <input type="email" id="regEmail" placeholder="Email" required />
+        <input type="password" id="regPassword" placeholder="Password" required />
+        <button type="submit">Registrati</button>
+      </form>
+    </section>
+
+    <!-- Sezione Login -->
+    <section id="authSection">
+      <h2>Login Utente</h2>
+      <form id="loginForm">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Accedi</button>
+      </form>
+    </section>
+
+    <!-- Sezione Profilo -->
+    <section id="profileSection" class="hidden">
+      <h2>Profilo Utente</h2>
+      <pre id="profileData"></pre>
+      <button id="btnLogout" type="button">Logout</button>
+
+    </section>
+
+    <!-- Sezione Ricerca TMDB -->
+    <section id="tmdbSection" class="hidden">
+      <h2>Ricerca Film su TMDB</h2>
+      <form id="searchForm">
+        <input type="text" id="query" placeholder="Cerca un film..." required />
+        <button type="submit">Cerca</button>
+      </form>
+      <div id="results"></div>
+    </section>
+
+    <!-- Sezione Film Database Locale -->
+    <section id="moviesSection" class="hidden">
+      <h2>Film Salvati nel Database Locale</h2>
+      <button id="btnLoadMovies">Carica Film</button>
+      <div id="moviesList"></div>
+    </section>
+
+    <!-- Messaggi -->
+    <section id="messages"></section>
+  </main>
+
+  <footer>
+    <p>Progetto TMDB Node.js - Backend & Frontend Test Dashboard</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
