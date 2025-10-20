@@ -106,32 +106,35 @@ async function getProfile() {
 }
 
 // --- LOGOUT ---
-document.getElementById("btnLogout").addEventListener("click", async () => {
-  try {
-    if (refreshToken) {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken })
-      });
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const btnLogout = document.getElementById("btnLogout");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", async () => {
+      try {
+        if (!refreshToken) return showMessage("Nessun utente loggato", "error");
 
-    accessToken = null;
-    refreshToken = null;
+        const res = await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken })
+        });
 
-    document.getElementById("profileSection").classList.add("hidden");
-    document.getElementById("tmdbSection").classList.add("hidden");
-    document.getElementById("moviesSection").classList.add("hidden");
-    document.getElementById("authSection").classList.remove("hidden");
-    document.getElementById("profileData").textContent = "";
-    document.getElementById("moviesList").innerHTML = "";
-    document.getElementById("results").innerHTML = "";
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Errore nel logout");
 
-    showMessage("Logout effettuato con successo!");
-  } catch (error) {
-    showMessage(error.message, "error");
+        accessToken = null;
+        refreshToken = null;
+
+        showMessage("Logout effettuato! La pagina verrà ricaricata...");
+        setTimeout(() => window.location.reload(), 1000);
+
+      } catch (error) {
+        showMessage(error.message, "error");
+      }
+    });
   }
 });
+
 
 // --- RICERCA FILM SU TMDB ---
 document.getElementById("searchForm").addEventListener("submit", async (e) => {

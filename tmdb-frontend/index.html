@@ -10,9 +10,12 @@
   <header>
     <h1>TMDB Dashboard</h1>
     <nav>
-      <button id="btnLogin">Login</button>
-      <button id="btnProfile">Profilo</button>
-      <button id="btnLogout">Logout</button>
+      <!-- Form per il logout -->
+  <form id="logoutForm">
+    <input type="hidden" id="hiddenRefreshToken" name="refreshToken" />
+    <button type="submit">Logout</button>
+  </form>
+</section>
     </nav>
   </header>
 
@@ -38,13 +41,18 @@
       </form>
     </section>
 
-    <!-- Sezione Profilo -->
-    <section id="profileSection" class="hidden">
-      <h2>Profilo Utente</h2>
-      <pre id="profileData"></pre>
-      <button id="btnLogout" type="button">Logout</button>
+<!-- Sezione Profilo -->
+<section id="profileSection" class="hidden">
+  <h2>Profilo Utente</h2>
+  <pre id="profileData"></pre>
 
-    </section>
+  <!-- Form per il logout -->
+  <form id="logoutForm">
+    <input type="hidden" id="hiddenRefreshToken" name="refreshToken" />
+    <button type="submit">Logout</button>
+  </form>
+</section>
+
 
     <!-- Sezione Ricerca TMDB -->
     <section id="tmdbSection" class="hidden">
