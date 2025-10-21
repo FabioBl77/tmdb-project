@@ -94,11 +94,31 @@ async function getProfile() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Errore nel recupero profilo");
 
-    document.getElementById("profileData").textContent = JSON.stringify(data, null, 2);
+    // Mostro la card profilo
+    const profileDiv = document.getElementById("profileData");
+    profileDiv.innerHTML = `
+      <p><strong>Username:</strong> ${data.username}</p>
+      <p><strong>Email:</strong> ${data.email}</p>
+      <p><strong>Ruolo:</strong> ${data.role}</p>
+    `;
+
+    // Mostro o nascondo sezioni in base al ruolo
+    if (data.role === "admin") {
+      document.getElementById("tmdbSection").classList.remove("hidden");
+    } else {
+      document.getElementById("tmdbSection").classList.add("hidden");
+    }
+
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("profileSection").classList.remove("hidden");
+    document.getElementById("moviesSection").classList.remove("hidden");
+
   } catch (error) {
     showMessage(error.message, "error");
   }
 }
+
+
 
 // --- LOGOUT ---
 document.addEventListener("DOMContentLoaded", () => {
