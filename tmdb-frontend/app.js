@@ -1,5 +1,3 @@
-// File: public/app.js
-
 const API_BASE_URL = "http://localhost:3000"; // backend locale
 let accessToken = null;
 let refreshToken = null;
@@ -21,7 +19,7 @@ async function authFetch(url, options = {}) {
 
   // Se token scaduto, prova a rinnovarlo
   if (res.status === 403 && refreshToken) {
-    const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken })
@@ -29,7 +27,6 @@ async function authFetch(url, options = {}) {
     if (refreshRes.ok) {
       const refreshData = await refreshRes.json();
       accessToken = refreshData.accessToken;
-      // Ritenta la richiesta originale con nuovo token
       options.headers['Authorization'] = `Bearer ${accessToken}`;
       res = await fetch(url, options);
     }
@@ -39,7 +36,7 @@ async function authFetch(url, options = {}) {
 }
 
 // --- LOGIN ---
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
+document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -50,7 +47,6 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Errore di login");
 
@@ -70,7 +66,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 });
 
 // --- REGISTRAZIONE ---
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
+document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const username = document.getElementById('regUsername').value.trim();
   const email = document.getElementById('regEmail').value.trim();
@@ -82,7 +78,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password })
     });
-
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Errore registrazione');
 
@@ -106,49 +101,51 @@ async function getProfile() {
 }
 
 // --- LOGOUT ---
-document.getElementById("logoutForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+  const btnLogout = document.getElementById("btnLogout");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", async () => {
+      try {
+        if (!refreshToken) return showMessage("Nessun utente loggato", "error");
 
-  try {
-    const refreshToken = document.getElementById("hiddenRefreshToken").value;
+        const res = await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Errore nel logout");
 
-    const res = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
+        accessToken = null;
+        refreshToken = null;
+
+        showMessage("Logout effettuato! La pagina verrà ricaricata...");
+        setTimeout(() => window.location.reload(), 1000);
+      } catch (error) {
+        showMessage(error.message, "error");
+      }
     });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Errore logout");
-
-    // Reset token e interfaccia
-    accessToken = null;
-    refreshToken = null;
-    document.getElementById("profileSection").classList.add("hidden");
-    document.getElementById("authSection").classList.remove("hidden");
-    document.getElementById("profileData").textContent = "";
-    document.getElementById("results").innerHTML = "";
-    document.getElementById("moviesList").innerHTML = "";
-
-    showMessage("Logout effettuato con successo!");
-
-    // Opzionale: ricarica pagina
-    window.location.reload();
-  } catch (error) {
-    showMessage(error.message, "error");
   }
 });
 
-
-
-// --- RICERCA FILM SU TMDB ---
+// --- RICERCA FILM SU TMDB CON FILTRI ---
 document.getElementById("searchForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const query = document.getElementById("query").value.trim();
-  if (!query) return showMessage("Inserisci una parola chiave per la ricerca", "error");
+  const title = document.getElementById("query").value.trim();
+  const genre = document.getElementById("filterGenre").value.trim();
+  const director = document.getElementById("filterDirector").value.trim();
+  const year = document.getElementById("filterYear").value.trim();
+
+  if (!title && !genre && !director && !year) return showMessage("Inserisci almeno un criterio di ricerca", "error");
 
   try {
-    const res = await authFetch(`${API_BASE_URL}/api/tmdb/search?q=${encodeURIComponent(query)}`);
+    const params = new URLSearchParams();
+    if (title) params.append("q", title);
+    if (genre) params.append("genre", genre);
+    if (director) params.append("director", director);
+    if (year) params.append("year", year);
+
+    const res = await authFetch(`${API_BASE_URL}/api/tmdb/search?${params.toString()}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Errore ricerca TMDB");
 
@@ -172,20 +169,60 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
         <div class="movie-info">
           <span class="director">Regista: ${movie.director || "N/D"}</span>
           <span class="release">Uscita: ${movie.release_date || "N/D"}</span>
+          <span class="genre">Genere: ${movie.genre || "N/D"}</span>
         </div>
         <p>${movie.overview || "Nessuna descrizione disponibile"}</p>
+        <button class="saveMovieBtn">Salva nel DB</button>
       `;
       resultsDiv.appendChild(div);
+
+      div.querySelector(".saveMovieBtn").addEventListener("click", async () => {
+        try {
+          const saveRes = await authFetch(`${API_BASE_URL}/api/movies`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tmdb_id: movie.id,
+              title: movie.title,
+              genre: movie.genre || "",
+              runtime: movie.runtime || null,
+              cast: movie.cast || "",
+              director: movie.director || "",
+              description: movie.overview || "",
+              release_date: movie.release_date || "",
+              poster_path: movie.poster_url || ""
+            })
+          });
+
+          const saveData = await saveRes.json();
+          if (!saveRes.ok) throw new Error(saveData.error || "Errore salvataggio film");
+
+          showMessage(`Film "${movie.title}" salvato nel DB!`);
+        } catch (error) {
+          showMessage(error.message, "error");
+        }
+      });
     });
   } catch (error) {
     showMessage(error.message, "error");
   }
 });
 
-// --- CARICA FILM DAL DATABASE LOCALE ---
-document.getElementById("btnLoadMovies").addEventListener("click", async () => {
+// --- CARICA FILM DAL DATABASE LOCALE CON FILTRI ---
+document.getElementById("btnLoadMovies")?.addEventListener("click", async () => {
+  const title = document.getElementById("dbFilterTitle").value.trim();
+  const genre = document.getElementById("dbFilterGenre").value.trim();
+  const director = document.getElementById("dbFilterDirector").value.trim();
+  const year = document.getElementById("dbFilterYear").value.trim();
+
   try {
-    const res = await authFetch(`${API_BASE_URL}/api/movies`);
+    const params = new URLSearchParams();
+    if (title) params.append("title", title);
+    if (genre) params.append("genre", genre);
+    if (director) params.append("director", director);
+    if (year) params.append("year", year);
+
+    const res = await authFetch(`${API_BASE_URL}/api/movies?${params.toString()}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Errore caricamento film");
 
@@ -212,7 +249,24 @@ document.getElementById("btnLoadMovies").addEventListener("click", async () => {
           <span class="release">Uscita: ${movie.release_date || "N/D"}</span>
         </div>
         <p>${movie.description || ""}</p>
+        <button class="deleteMovieBtn">Elimina</button>
       `;
+
+      div.querySelector(".deleteMovieBtn").addEventListener("click", async () => {
+        try {
+          const delRes = await authFetch(`${API_BASE_URL}/api/movies/${movie.id}`, {
+            method: "DELETE",
+          });
+          const delData = await delRes.json();
+          if (!delRes.ok) throw new Error(delData.error || "Errore eliminazione film");
+
+          showMessage(`Film "${movie.title}" eliminato dal DB!`);
+          div.remove();
+        } catch (error) {
+          showMessage(error.message, "error");
+        }
+      });
+
       moviesList.appendChild(div);
     });
   } catch (error) {

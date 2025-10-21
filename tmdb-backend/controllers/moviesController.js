@@ -2,18 +2,28 @@ import { Movie } from '../models/Movie.js';
 import { Op } from 'sequelize';
 
 // --- GET FILM CON FILTRI ---
+// Possibili query string: ?title=...&genre=...&director=...&year=...
 export const getMovies = async (req, res, next) => {
   try {
+    const { title, genre, director, year } = req.query;
+
+    // Costruzione dei filtri dinamici
     const filters = {};
 
-    // Filtro per anno
-    if (req.query.year) {
-      filters.release_date = { [Op.like]: `${req.query.year}%` };
+    if (title) {
+      filters.title = { [Op.like]: `%${title}%` };
     }
 
-    // Filtro per genere
-    if (req.query.genre) {
-      filters.genre = req.query.genre; // Assumendo che il campo nel modello sia 'genre'
+    if (genre) {
+      filters.genre = { [Op.like]: `%${genre}%` };
+    }
+
+    if (director) {
+      filters.director = { [Op.like]: `%${director}%` };
+    }
+
+    if (year) {
+      filters.release_date = { [Op.like]: `${year}%` }; // Filtra per anno
     }
 
     const movies = await Movie.findAll({ where: filters });
@@ -35,28 +45,28 @@ export const getMovieById = async (req, res, next) => {
 };
 
 // --- CREAZIONE FILM ---
+// POST /api/movies
 export const createMovie = async (req, res, next) => {
   try {
-    const { tmdbId, title, description, release_date, genre, poster_path, director, runtime, cast } = req.body;
+    const { tmdb_id, title, genre, runtime, cast, director, description, release_date, poster_path } = req.body;
+    if (!tmdb_id || !title) return res.status(400).json({ error: 'tmdb_id e title richiesti' });
 
-    if (!tmdbId || !title) return res.status(400).json({ error: 'Dati film incompleti' });
-
-    const existing = await Movie.findOne({ where: { tmdbId } });
-    if (existing) return res.status(400).json({ error: 'Film già salvato' });
+    const existing = await Movie.findOne({ where: { tmdb_id } });
+    if (existing) return res.status(400).json({ error: 'Film già presente nel DB' });
 
     const newMovie = await Movie.create({
-      tmdbId,
+      tmdb_id,
       title,
+      genre,
+      runtime,
+      cast,
+      director,
       description,
       release_date,
-      genre,
-      poster_path,
-      director,
-      runtime,
-      cast
+      poster_path
     });
 
-    res.status(201).json(newMovie);
+    res.status(201).json({ message: 'Film salvato', movie: newMovie });
   } catch (error) {
     next(error);
   }

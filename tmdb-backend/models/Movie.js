@@ -18,7 +18,7 @@ export const Movie = sequelize.define(
       type: DataTypes.STRING(200),
       allowNull: false
     },
-    genre: { // rinominato da genres per coerenza
+    genre: { 
       type: DataTypes.STRING,
       allowNull: true
     },
@@ -30,7 +30,7 @@ export const Movie = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true
     },
-    director: { // nuovo campo
+    director: { 
       type: DataTypes.STRING,
       allowNull: true
     },
@@ -42,7 +42,7 @@ export const Movie = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: true
     },
-    poster_path: { // nuovo campo per URL immagine
+    poster_path: { 
       type: DataTypes.STRING,
       allowNull: true
     }

@@ -4,6 +4,11 @@ import { getMovies, getMovieById, createMovie, updateMovie, deleteMovie } from '
 
 const router = express.Router();
 
+/**
+ * GET /api/movies
+ * Opzioni di filtro (query string):
+ * ?title=...&genre=...&director=...&release_date=...
+ */
 router.get('/', verifyToken, getMovies);
 router.get('/:id', verifyToken, getMovieById);
 router.post('/', verifyToken, requireRole('admin'), createMovie);
