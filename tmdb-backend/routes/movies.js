@@ -11,8 +11,8 @@ const router = express.Router();
  */
 router.get('/', verifyToken, getMovies);
 router.get('/:id', verifyToken, getMovieById);
-router.post('/', verifyToken, requireRole('admin'), createMovie);
-router.put('/:id', verifyToken, requireRole('admin'), updateMovie);
-router.delete('/:id', verifyToken, requireRole('admin'), deleteMovie);
+router.post('/', verifyToken, createMovie);
+router.put('/:id', verifyToken, updateMovie);
+router.delete('/:id', verifyToken, deleteMovie);
 
 export default router;

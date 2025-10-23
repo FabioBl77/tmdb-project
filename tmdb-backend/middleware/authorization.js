@@ -24,6 +24,7 @@ export const verifyToken = async (req, res, next) => {
 };
 
 // --- VERIFICA RUOLO ---
+
 export const requireRole = (role) => (req, res, next) => {
   if (!req.user) return res.status(401).json({ error: 'Utente non autenticato' });
   if (req.user.role !== role) return res.status(403).json({ error: 'Accesso negato' });

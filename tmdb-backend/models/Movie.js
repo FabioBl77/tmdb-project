@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
+import { User } from './User.js'; // importa il modello User
 
 export const Movie = sequelize.define(
   'Movie',
@@ -9,10 +10,13 @@ export const Movie = sequelize.define(
       autoIncrement: true,
       primaryKey: true
     },
+    userId: {               // collega il film all'utente
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     tmdb_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     title: {
       type: DataTypes.STRING(200),
@@ -50,6 +54,10 @@ export const Movie = sequelize.define(
   {
     tableName: 'movies',
     timestamps: true,
-    underscored: true // se vuoi che i campi timestamp siano created_at / updated_at
+    underscored: true
   }
 );
+
+// Relazione tra Movie e User
+Movie.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Movie, { foreignKey: 'userId' });

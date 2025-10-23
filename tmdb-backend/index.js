@@ -6,6 +6,12 @@ import dotenv from 'dotenv';
 import SequelizeStoreLib from 'connect-session-sequelize';
 import { sequelize } from './config/database.js';
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Import dei modelli
 import './models/User.js';
 import './models/Movie.js';
@@ -15,6 +21,8 @@ import './passport/passport.js';
 import authRoutes from './routes/auth.js';
 import movieRoutes from './routes/movies.js';
 import tmdbRoutes from './routes/tmdb.js';
+
+
 
 dotenv.config();
 
