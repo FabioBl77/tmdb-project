@@ -9,12 +9,12 @@ export const getMovies = async (req, res, next) => {
 
     // Filtra solo i film dell'utente loggato
     const filters = { userId: req.user.id };
-
+    // Ricerca filtrata
     if (title) filters.title = { [Op.like]: `%${title}%` };
     if (genre) filters.genre = { [Op.like]: `%${genre}%` };
     if (director) filters.director = { [Op.like]: `%${director}%` };
     if (year) filters.release_date = { [Op.like]: `${year}%` };
-
+    // Recupera i film con i filtri applicati e li restituisce al client
     const movies = await Movie.findAll({ where: filters });
     res.status(200).json(movies);
   } catch (error) {

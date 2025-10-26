@@ -11,10 +11,11 @@ function showMessage(text, type = "info") {
 }
 
 // --- FUNZIONE GENERICA PER FETCH PROTETTO ---
+// Imposta l’header Authorization se esiste accessToken.
 async function authFetch(url, options = {}) {
   if (!options.headers) options.headers = {};
   if (accessToken) options.headers['Authorization'] = `Bearer ${accessToken}`;
-
+  // Fa la richiesta fetch verso l’API backend.
   let res = await fetch(url, options);
 
   // Se token scaduto, prova a rinnovarlo
