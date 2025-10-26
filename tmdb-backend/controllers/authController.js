@@ -85,6 +85,7 @@ export const refreshUserToken = async (req, res, next) => {
     const tokenEntry = await RefreshToken.findOne({ where: { token: refreshToken, revoked: false } });
     if (!tokenEntry) return res.status(403).json({ error: 'Refresh token non valido' });
 
+    // Decodifica il JWT e verifica scadenza tramite firma 
     let decoded;
     try {
       decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
@@ -92,9 +93,11 @@ export const refreshUserToken = async (req, res, next) => {
       return res.status(403).json({ error: 'Refresh token scaduto o non valido' });
     }
 
+    // Recupera l'utente associato
     const user = await User.findByPk(decoded.id);
     if (!user) return res.status(404).json({ error: 'Utente non trovato' });
 
+    // Genera un nuovo access token
     const newAccessToken = generateAccessToken(user);
     res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
